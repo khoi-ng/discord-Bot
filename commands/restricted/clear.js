@@ -1,7 +1,12 @@
 module.exports = {
     name: 'clear',
-    description: 'clear/delete all messages',
-    async execute(msg, args, Discord) {
+    aliases: ['rm', 'remove', 'delete'],
+    description: 'delete a number of messages',
+    args: true,
+    guildOnly: true,
+    permissions: 'ADMINISTRATOR',
+    usage: '<number>',
+    async execute(msg, args, cmd, client, Discord) {
         if (args[1] != null || isNaN(args[0]) || args[0] < 1 || args[0] > 100) {
             let embed = new Discord.MessageEmbed()
                 .setColor('#e42643')
@@ -14,5 +19,6 @@ module.exports = {
                 msg.channel.bulkDelete(msgs);
             });
         }
+
     }
 }

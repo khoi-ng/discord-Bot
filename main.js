@@ -1,24 +1,20 @@
 const Discord = require('discord.js');
 const config = require("./config.json");
-const prefix = "!";
+const prefix = config.Prefix;
 const client = new Discord.Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
 const fs = require('fs');
-const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const memberRoles = new Map([['members', '822693928100560906'], ['mod', '822697588892762112'], ['admin', '822912818202017932']]);
+const channels = new Map([['welcome', '822695347074760704'],]);
 //Collection of maps
 client.commands = new Discord.Collection();
-const memberRoles = new Map([
-    ['members', '822693928100560906'],
-    ['mod', '822697588892762112'],
-    ['admin', '822912818202017932'],
-]);
-const channels = new Map([
-    ['welcome', '822695347074760704'],
-]);
-
-const commandFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'));
-for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command);
+client.cooldowns = new Discord.Collection();
+const commandFolders = fs.readdirSync('./commands');
+for (const folder of commandFolders) {
+    const commandFiles = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith('.js'));
+    for (const file of commandFiles) {
+        const command = require(`./commands/${folder}/${file}`);
+        client.commands.set(command.name, command);
+    }
 }
 
 client.on('ready', () => {
@@ -32,61 +28,57 @@ client.on('guildMemberAdd', member => {
 });
 
 client.on("message", async msg => {
-    //bot redet nicht mit anderen Bots, Nachricht muss mit Prefix anfangen
+    //https://discordjs.guide/command-handling/adding-features.html#required-arguments
     if (msg.author.bot || !msg.content.startsWith(prefix)) return;
-    //Prefix aus der Message rausnehmen
     const args = msg.content.slice(prefix.length).split(/ +/);
-    const command = args.shift().toLowerCase();
-    switch (command) {
-        case 'clear':
-            if (msg.member != null && msg.member.roles.cache.has(memberRoles.get('admin'))) {
-                client.commands.get('clear').execute(msg, args, Discord);
-            } else {
-                msg.reply('You have no permission for this command');
-            }
-            break;
-        case 'rickroll':
-            msg.reply('https://youtu.be/dQw4w9WgXcQ');
-            break;
-        case 'ping':
-            client.commands.get('ping').execute(msg, args);
-            break;
-        case 'kick':
-            if (msg.member.permissions.has('KICK_MEMBERS')) {
-                msg.reply('You have permission to kick members');
-            } else {
-                msg.reply('You DONT have permission to kick members');
-            }
-            break;
-        case 'sum':
-            client.commands.get('sum').execute(msg, args);
-            break;
-        case 'reactionroles':
-            client.commands.get('reactionroles').execute(msg, args, Discord, client);
-            break;
-        case 'date':
-            var date = new Date(Date.now());
-            msg.reply(`${days[date.getDay()]} ${date.getDate()}.${date.getMonth()}.${date.getFullYear()} :calendar_spiral:`);
-            break;
-        case 'time':
-            var date = new Date(Date.now());
-            msg.reply(`${date.getHours()}:${date.getMinutes()}:watch:`);
-            break;
-        case 'latency':
-            const timeTaken = Date.now() - msg.createdTimestamp;
-            msg.reply(`latency:satellite::${timeTaken}ms.`);
-            break;
-        case 'bitch':
-            if (msg.member != null && msg.member.roles.cache.has(memberRoles.get('mod'))) {
-                msg.reply(`I'm your ${command}!`);
-            } else {
-                msg.reply(`You're a ${command}!`);
-            }
-            break;
-        default:
-            msg.reply('I dont know what you mean.');
-            break;
+    const commandName = args.shift().toLowerCase();
+    //alisias
+    const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+    if (!command) return msg.reply('I dont know what you mean.');
+    //check if command needs arguments
+    if (command.args && !args.length) {
+        let reply = `You didn't provide any arguments, ${msg.author}!`;
+        if (command.usage) {
+            reply += `\nThe proper usage would be: \`${prefix}${command.name} ${command.usage}\``;
+        }
+        return msg.channel.send(reply);
     }
+
+    //check if command is only avaiable in guild
+    if (command.guildOnly && msg.channel.type === 'dm') {
+        return msg.reply('I can\'t execute that command inside DMs!');
+    }
+    //check what permission is needed to excute the command
+    if (command.permissions) {
+        const authorPerms = msg.channel.permissionsFor(msg.author);
+        if (!authorPerms || !authorPerms.has(command.permissions)) {
+            return msg.reply('You can not do this. No permission !');
+        }
+    }
+    //check if command is on cooldown
+    // const { cooldowns } = client;
+    // if (!cooldowns.has(command.name)) {
+    //     cooldowns.set(command.name, new Discord.Collection());
+    // }
+    // const now = Date.now();
+    // const timestamps = cooldowns.get(command.name);
+    // const cooldownAmount = (command.cooldown || 3) * 1000;
+    // if (timestamps.has(msg.author.id)) {
+    //     const expirationTime = timestamps.get(msg.author.id) + cooldownAmount;
+    //     if (now < expirationTime) {
+    //         const timeLeft = (expirationTime - now) / 1000;
+    //         return msg.reply(`please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
+    //     }
+    //     timestamps.set(message.author.id, now);
+    //     setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
+    // }
+    //execute command
+    try {
+        command.execute(msg, args, commandName, client, Discord, memberRoles);
+    } catch (err) {
+        console.log(err);
+    }
+
 });
 
 

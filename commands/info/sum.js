@@ -1,6 +1,10 @@
 module.exports = {
     name: 'sum',
     description: 'this is a sum command',
+    guildOnly: false,
+    cooldown: 5,
+    args: true,
+    usage: '<number> <number>',
     execute(msg, args) {
         //neues Array erstellen das nur floats enthät
         const numArgs = args.map(x => parseFloat(x));

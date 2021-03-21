@@ -1,7 +1,8 @@
 module.exports = {
     name: 'ping',
+    guildOnly: false,
     description: 'this is a ping command',
-    execute(msg, args) {
+    execute(msg) {
         msg.reply('Pong!');
     }
 }
