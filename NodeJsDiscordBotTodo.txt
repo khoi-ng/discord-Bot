@@ -1,0 +1,58 @@
+- Musikfunktion
+- Rollenverteilung generisch machen
+- mit MongoDB verbinden, ein Filesystem einbinden
+- Alle Befehle im Commands Ordner auslagern
+- MessageEmbed übersicht überalle Befehle machen
+
+    //"test": "echo \"Error: no test specified\" && exit 1"
+//--------------------------------------Command Ideas--------------------------------------------------------------//
+
+//--------------------------------------unrestricted command-------------------------------------------------------//
+//-------------------------By default this commands, are usable by all user---------------------------------------//
+
+//!time             (provides you with current Time and day)
+//!date utf          (provides you with current date)
+//!rickroll         (sends youtube link to rick roll)
+//!ping             (gives latency of message)
+//!latency             (gives latency of message)
+//!sum {number} {number}          (calculate the sum of numbers)
+//!list                  (list all commands that are avaiable for you with description)
+//!list roleID            (list all commands that are avaiable for specific role)
+//!list role            (list all commands that are avaiable for specific role, doesn't work if you have another role with same rolename)
+
+//----------------------------------------restricted command-------------------------------------------------------//
+//---By default this commands, are only usable by the server-owner, the owner can give permission to other roles to//
+//---use the commands, with the !asign command.--------------------------------------------------------------------//
+
+//!welcome {channelID} "{channel-message}"  (for setting a welcome channel, channel-message in quotationmarks)
+//!undo-welcome {channelID}                 (for unsetting a welcome channel)
+
+//!asign {!command} roleID              (give a role permission for a command, {!command} can be chained)
+//!asign {!command} rolename            (give a role permission for a command, doesn't work if you have another role with same rolename)
+//!asign {!command}                     (give all roles permission for a command)
+//!asign allCommands roleID              (give a role permission for all commands)
+//!undo-asign {!command} roleID             (undo permission for role to use command)
+//!undo-asign {!command} rolename            (undo permission for role to use command, doesn't work if you have another role with same rolename)
+//!undo-asign {!command}                    (undo permission for all role to use command, except server-owner)
+
+//!list {!command}                     (list which role has permission, for {!command}, good if you wnat to remove/add a certain role from the permission)
+
+//!add-role messageID :emote: roleID        (link roles to emotes and add to message)
+//!add-role messageID :emote: rolename      (link roles to emotes and add to message, doesn't work if you have another role with same rolename)
+//!role-gen :emote: roleID                  (gives messageEmbed with role description)
+//!role-gen :emote: rolename                 (gives messageEmbed with role description, doesn't work if you have another role with same rolename)
+//!undo-role messageID roleID            (remove role from message)
+//!undo-role messageID rolename         (remove role from message, doesn't work if you have another role with same rolename)
+
+
+//!restrict {!command}           (restrict a command, no one can use it except the server owner)
+//!restr {!command}              (restrict a command, no one can use it except the server owner)
+//!undo-restrict {!command}        (restrict a command, no one can use it except the server owner)
+//!undo-restr {!command}          (restrict a command, no one can use it except the server owner)
+
+//!clear {number}                (permanently remove {number} of posts, clear is a undoable command)
+
+//!bann UserID                    (bann a User from your server)
+//!undo-bann UserID               (undo bann on User from your server)
+//!kick UserID channelID          (kick a User from a voice-channel)
+
